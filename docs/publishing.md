@@ -47,22 +47,58 @@ Publish order is:
 1. `fortheagent`
 2. `fortheagent-cli`
 
-## Required Secrets
+## Trusted Publishing
 
-GitHub Actions release needs:
+Trusted publishing is the default release path for this repository.
 
-- `NPM_TOKEN`
+That means the `Release` workflow publishes with GitHub Actions OIDC instead of
+an npm token.
 
-Repository secret location:
+Why:
 
-- `Settings`
-- `Secrets and variables`
-- `Actions`
-- add `NPM_TOKEN`
+- npm recommends trusted publishing over long-lived publish tokens
+- npm can generate provenance automatically for public packages
+- there is no write token to rotate or leak in CI
 
-The repository root includes [`.npmrc`](.npmrc),
-which maps `NPM_TOKEN` to the npm registry auth token slot. This keeps local
-verification and GitHub Actions aligned.
+Source:
+
+- [Trusted publishing for npm packages](https://docs.npmjs.com/trusted-publishers/)
+- [npm trust](https://docs.npmjs.com/cli/v11/commands/npm-trust/)
+
+## One-Time npm Setup
+
+Each published package must be linked to this repository's release workflow as
+a trusted publisher.
+
+Repository:
+
+- `gwkim92/fortheagent`
+
+Workflow file:
+
+- `release.yml`
+
+Packages that need trusted publisher configuration:
+
+- `fortheagent`
+- `fortheagent-cli`
+
+If you want to configure this from the CLI, npm currently requires:
+
+- `npm@11.10.0` or newer
+- account-level 2FA enabled
+- the package to already exist on npm
+- granular access tokens are not accepted for `npm trust`
+
+Example commands:
+
+```bash
+npx npm@11.11.1 trust github fortheagent --repo gwkim92/fortheagent --file release.yml --yes
+npx npm@11.11.1 trust github fortheagent-cli --repo gwkim92/fortheagent --file release.yml --yes
+```
+
+You can also configure the same trusted publisher from each package page on
+npmjs.com under package settings.
 
 ## Commands
 
@@ -76,24 +112,25 @@ npm run version-packages
 npm run release
 ```
 
-To verify the token locally before running the release workflow:
-
-```bash
-NPM_TOKEN=your-token-here npm publish --workspace ./npm --access public
-NPM_TOKEN=your-token-here npm publish --workspace ./cli --access public
-```
-
-If the first command fails with a token or 2FA error, the release workflow will
-fail for the same reason.
+The release workflow upgrades npm in CI to a trusted-publishing-capable version
+before publishing.
 
 ## Safe Release Flow
 
 1. Add one or more `.changeset/*.md` files for the release.
 2. Merge the release-worthy changes into `main`.
-3. Open GitHub Actions and run the `Release` workflow manually on `main`.
-4. If Changesets detects pending changesets, it will create or update the release PR.
-5. Merge that release PR into `main`.
-6. Run the `Release` workflow manually on `main` again to publish to npm.
+3. Ensure trusted publisher is configured for both npm packages.
+4. Open GitHub Actions and run the `Release` workflow manually on `main`.
+5. If Changesets detects pending changesets, it will create or update the release PR.
+6. Merge that release PR into `main`.
+7. Run the `Release` workflow manually on `main` again to publish to npm.
+
+## Fallback
+
+If trusted publishing is temporarily unavailable, you can still publish
+manually from a local shell with a granular token that has `bypass 2FA`
+enabled. That should be treated as a break-glass fallback, not the default
+release path.
 
 ## Public Commands
 
