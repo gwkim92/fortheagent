@@ -374,6 +374,23 @@ function renderManagedDocument(title: string, body: string): string {
   return [`# ${title}`, "", body.trim(), ""].join("\n");
 }
 
+function renderSkillDocument(options: {
+  name: string;
+  title: string;
+  description: string;
+  body: string;
+}): string {
+  const frontmatter = [
+    "---",
+    `name: ${JSON.stringify(options.name)}`,
+    `description: ${JSON.stringify(options.description)}`,
+    "---",
+    ""
+  ].join("\n");
+
+  return `${frontmatter}# ${options.title}\n\n${options.body.trim()}\n`;
+}
+
 function renderSubtreeAdapter(options: {
   provider: "codex" | "claude" | "gemini";
   rootPath: string;
@@ -1695,7 +1712,7 @@ export async function buildRepositoryFileContent(
           `Scoped root: ${areaRoot}.`,
           ...(subtree?.packageName ? [`Package name: ${subtree.packageName}.`] : []),
           ...(scan.subtreeRoots.includes(areaRoot)
-            ? ["This subtree was detected as a major work root during repository scan."]
+            ? [`Subtree ${areaRoot} was detected as a major work root during repository scan.`]
             : []),
           ...Object.entries(subtree?.scripts ?? {}).map(
             ([name, script]) => `Subtree script ${name} -> ${script}.`
@@ -1708,10 +1725,10 @@ export async function buildRepositoryFileContent(
             .map((value) => `API surface inside subtree: ${value}.`)
         ],
         workingAssumptions: buildAssumptions(context, [
-          "This area doc should stay narrow and point back to broader architecture docs only when the subtree cannot be understood locally."
+          `Keep this area doc scoped to ${areaRoot} and point back to broader architecture docs only when the subtree cannot be understood locally.`
         ]),
         requiredOutputs: buildRequiredOutputs(context, [
-          "Describe the responsibility of this subtree, the main commands used here, and the nearest architecture boundaries it touches."
+          `Describe the responsibility of ${areaRoot}, the main commands used here, and the nearest architecture boundaries it touches.`
         ])
       })
     );
@@ -3186,9 +3203,11 @@ export async function buildRepositoryFileContent(
     case ".github/workflows/ci.yml":
       return `${buildCiWorkflow(scan)}\n`;
     case ".agents/skills/docs-writer/SKILL.md":
-      return renderManagedDocument(
-        "Docs Writer Skill",
-        [
+      return renderSkillDocument({
+        name: "docs-writer",
+        title: "Docs Writer Skill",
+        description: "Write or refresh repository documentation inside the generated foundation.",
+        body: [
           "Use when the task is to write or refresh repository documentation inside the generated foundation.",
           "",
           "Workflow:",
@@ -3198,11 +3217,13 @@ export async function buildRepositoryFileContent(
             "Prefer updating existing canonical docs over creating new side documents."
           ])
         ].join("\n")
-      );
+      });
     case ".agents/skills/repo-review/SKILL.md":
-      return renderManagedDocument(
-        "Repo Review Skill",
-        [
+      return renderSkillDocument({
+        name: "repo-review",
+        title: "Repo Review Skill",
+        description: "Assess repository health, drift, or missing design context.",
+        body: [
           "Use when the task is to assess repository health, drift, or missing design context.",
           "",
           "Workflow:",
@@ -3212,11 +3233,13 @@ export async function buildRepositoryFileContent(
             "Report findings in descending risk order with explicit file references."
           ])
         ].join("\n")
-      );
+      });
     case ".agents/skills/verification/SKILL.md":
-      return renderManagedDocument(
-        "Verification Skill",
-        [
+      return renderSkillDocument({
+        name: "verification",
+        title: "Verification Skill",
+        description: "Provide proof, validation, or acceptance evidence for repository changes.",
+        body: [
           "Use when a task requires proof, validation, or acceptance evidence rather than new design content.",
           "",
           "Workflow:",
@@ -3226,11 +3249,13 @@ export async function buildRepositoryFileContent(
             "Treat missing evidence as a repository quality issue, not a style preference."
           ])
         ].join("\n")
-      );
+      });
     case ".agents/skills/architecture-brief/SKILL.md":
-      return renderManagedDocument(
-        "Architecture Brief Skill",
-        [
+      return renderSkillDocument({
+        name: "architecture-brief",
+        title: "Architecture Brief Skill",
+        description: "Summarize system shape, boundaries, or architectural tradeoffs quickly.",
+        body: [
           "Use when the task is to summarize system shape, boundaries, or architectural tradeoffs quickly.",
           "",
           "Workflow:",
@@ -3240,7 +3265,7 @@ export async function buildRepositoryFileContent(
             "Write concise architecture briefs that point back to the canonical docs instead of replacing them."
           ])
         ].join("\n")
-      );
+      });
     default: {
       if (repositoryPath.startsWith("docs/work/active/")) {
         return renderMergeManagedDocument(

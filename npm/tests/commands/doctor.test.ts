@@ -132,6 +132,25 @@ describe("runDoctor", () => {
     expect(result.repairCommands).toContain(`fortheagent sync --repair --cwd ${cwd}`);
   });
 
+  it("reports missing repository skill frontmatter", async () => {
+    const cwd = await mkdtemp(path.join(tmpdir(), "agent-foundation-doctor-"));
+
+    await runInit({ cwd, mode: "deferred" });
+    await writeFile(
+      path.join(cwd, ".agents", "skills", "docs-writer", "SKILL.md"),
+      "# Docs Writer Skill\n",
+      "utf8"
+    );
+
+    const result = await runDoctor({ cwd });
+
+    expect(result.ok).toBe(false);
+    expect(result.errors).toContain(
+      "Missing or invalid skill frontmatter: .agents/skills/docs-writer/SKILL.md"
+    );
+    expect(result.repairCommands).toContain(`fortheagent sync --cwd ${cwd}`);
+  });
+
   it("reports unknown manifest profile values", async () => {
     const cwd = await mkdtemp(path.join(tmpdir(), "agent-foundation-doctor-"));
 
@@ -391,6 +410,52 @@ describe("runDoctor", () => {
 
     expect(
       result.warnings.some((warning) => warning.includes("\"source_of_truth\":"))
+    ).toBe(false);
+  });
+
+  it("does not warn about duplication for generated subtree area docs", async () => {
+    const cwd = await mkdtemp(path.join(tmpdir(), "agent-foundation-doctor-"));
+
+    await mkdir(path.join(cwd, "apps", "web"), { recursive: true });
+    await mkdir(path.join(cwd, "services", "api"), { recursive: true });
+    await writeFile(
+      path.join(cwd, "package.json"),
+      JSON.stringify(
+        {
+          name: "area-doc-duplication-check",
+          private: true,
+          workspaces: ["apps/*", "services/*"]
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+    await writeFile(
+      path.join(cwd, "apps", "web", "package.json"),
+      JSON.stringify({ name: "@check/web", dependencies: { next: "16.0.0" } }, null, 2),
+      "utf8"
+    );
+    await writeFile(
+      path.join(cwd, "services", "api", "package.json"),
+      JSON.stringify({ name: "@check/api", dependencies: { fastify: "5.0.0" } }, null, 2),
+      "utf8"
+    );
+
+    await runInit({
+      cwd,
+      projectPhase: "existing",
+      frontend: "next",
+      backend: "fastify",
+      systemType: "internal-tool",
+      architectureStyle: "modular-monolith"
+    });
+
+    const result = await runDoctor({ cwd });
+
+    expect(result.ok).toBe(true);
+    expect(
+      result.warnings.some((warning) => warning.includes("Context duplication warning"))
     ).toBe(false);
   });
 

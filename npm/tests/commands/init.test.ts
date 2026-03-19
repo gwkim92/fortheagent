@@ -165,6 +165,9 @@ describe("runInit", () => {
     ).resolves.toContain("## Active Work Item");
     await expect(
       readFile(path.join(cwd, ".agents", "skills", "docs-writer", "SKILL.md"), "utf8")
+    ).resolves.toContain('name: "docs-writer"');
+    await expect(
+      readFile(path.join(cwd, ".agents", "skills", "docs-writer", "SKILL.md"), "utf8")
     ).resolves.toContain("Docs Writer Skill");
     await expect(
       readFile(path.join(cwd, ".claude", "rules", "index.md"), "utf8")
