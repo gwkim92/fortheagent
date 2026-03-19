@@ -60,6 +60,10 @@ Repository secret location:
 - `Actions`
 - add `NPM_TOKEN`
 
+The repository root includes [`.npmrc`](.npmrc),
+which maps `NPM_TOKEN` to the npm registry auth token slot. This keeps local
+verification and GitHub Actions aligned.
+
 ## Commands
 
 From the repository root:
@@ -71,6 +75,16 @@ npm run changeset
 npm run version-packages
 npm run release
 ```
+
+To verify the token locally before running the release workflow:
+
+```bash
+NPM_TOKEN=your-token-here npm publish --workspace ./npm --access public
+NPM_TOKEN=your-token-here npm publish --workspace ./cli --access public
+```
+
+If the first command fails with a token or 2FA error, the release workflow will
+fail for the same reason.
 
 ## Safe Release Flow
 
