@@ -11,7 +11,7 @@
     "test": "npm --workspace ./npm test && npm --workspace ./cli test",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "npm publish --workspace ./npm --access public && npm publish --workspace ./cli --access public"
+    "release": "node ./scripts/release.mjs"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.59.0"

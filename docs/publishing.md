@@ -115,6 +115,14 @@ npm run release
 The release workflow upgrades npm in CI to a trusted-publishing-capable version
 before publishing.
 
+The publish step is idempotent:
+
+- if a workspace version is already on npm, release skips it
+- if a workspace version is new, release publishes it
+
+That means rerunning the `Release` workflow on the same version should not try
+to republish an existing package version.
+
 ## Safe Release Flow
 
 1. Add one or more `.changeset/*.md` files for the release.
