@@ -37,9 +37,10 @@ independent release cadences.
 
 This monorepo uses Changesets.
 
-- one release PR is opened from pending changesets
-- both packages version together
-- once merged to `main`, GitHub Actions publishes both packages
+- release is manual
+- run the `Release` workflow from the `main` branch when you are ready
+- if `main` contains pending changesets, the workflow creates or updates the release PR
+- if `main` already contains the versioned release commit, the workflow publishes both packages
 
 Publish order is:
 
@@ -52,6 +53,13 @@ GitHub Actions release needs:
 
 - `NPM_TOKEN`
 
+Repository secret location:
+
+- `Settings`
+- `Secrets and variables`
+- `Actions`
+- add `NPM_TOKEN`
+
 ## Commands
 
 From the repository root:
@@ -63,6 +71,15 @@ npm run changeset
 npm run version-packages
 npm run release
 ```
+
+## Safe Release Flow
+
+1. Add one or more `.changeset/*.md` files for the release.
+2. Merge the release-worthy changes into `main`.
+3. Open GitHub Actions and run the `Release` workflow manually on `main`.
+4. If Changesets detects pending changesets, it will create or update the release PR.
+5. Merge that release PR into `main`.
+6. Run the `Release` workflow manually on `main` again to publish to npm.
 
 ## Public Commands
 
