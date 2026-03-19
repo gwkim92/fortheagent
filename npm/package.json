@@ -1,0 +1,35 @@
+{
+  "name": "fortheagent",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Agent-ready repository bootstrap and docs contract for Codex, Claude Code, and Gemini CLI",
+  "type": "module",
+  "bin": {
+    "fortheagent": "dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && vitest run"
+  },
+  "dependencies": {
+    "ink": "^6.8.0",
+    "react": "^19.2.4",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.14",
+    "execa": "^9.6.0",
+    "ink-testing-library": "^4.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

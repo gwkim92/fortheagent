@@ -1,0 +1,27 @@
+{
+  "name": "fortheagent-cli",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Interactive launcher for the fortheagent repository foundation workflow",
+  "type": "module",
+  "bin": {
+    "fortheagent-cli": "dist/cli.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && vitest run"
+  },
+  "dependencies": {
+    "fortheagent": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "execa": "^9.6.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
+    "zod": "^4.1.5"
+  }
+}

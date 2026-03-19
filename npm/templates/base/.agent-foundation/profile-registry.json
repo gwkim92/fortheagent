@@ -1,0 +1,43 @@
+{
+  "version": "0.1.0",
+  "axes": {
+    "frontend": {
+      "next": {
+        "templates": [
+          "templates/frontend/next"
+        ],
+        "outputs": [
+          "docs/architecture/frontend.md"
+        ]
+      },
+      "none": {
+        "templates": [],
+        "outputs": []
+      }
+    },
+    "backend": {
+      "nest": {
+        "templates": [
+          "templates/backend/nest"
+        ],
+        "outputs": [
+          "docs/architecture/backend.md"
+        ]
+      },
+      "none": {
+        "templates": [],
+        "outputs": []
+      }
+    },
+    "quality": {
+      "ci-basic": {
+        "templates": [
+          "templates/quality/ci-basic"
+        ],
+        "outputs": [
+          ".github/workflows/ci.yml"
+        ]
+      }
+    }
+  }
+}

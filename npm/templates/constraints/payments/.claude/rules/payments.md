@@ -1,0 +1,1 @@
+claude payments rule placeholder

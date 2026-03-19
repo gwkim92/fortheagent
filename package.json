@@ -1,0 +1,19 @@
+{
+  "name": "fortheagent-workspace",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "npm",
+    "cli"
+  ],
+  "scripts": {
+    "build": "npm --workspace ./npm run build && npm --workspace ./cli run build",
+    "test": "npm --workspace ./npm test && npm --workspace ./cli test",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm publish --workspace ./npm --access public && npm publish --workspace ./cli --access public"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.28.1"
+  }
+}

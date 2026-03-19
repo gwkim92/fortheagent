@@ -1,0 +1,47 @@
+import { readManifest } from "../lib/current-selection.js";
+
+export type StatusResult =
+  | {
+      ok: true;
+      status: "resolved" | "unresolved";
+      readiness: "ready" | "needs-discovery";
+      frontend: string | null;
+      backend: string | null;
+      systemType: string | null;
+      architectureStyle: string | null;
+      constraints: string[];
+      workflowMode: "design" | "implementation" | "maintenance";
+      activeWorkItem: string | null;
+      lastResolvedAt: string | null;
+    }
+  | {
+      ok: false;
+      status: "missing";
+      reason: string;
+    };
+
+export async function runStatus(options: { cwd: string }): Promise<StatusResult> {
+  const manifest = await readManifest(options.cwd);
+
+  if (!manifest) {
+    return {
+      ok: false,
+      status: "missing",
+      reason: "forTheAgent manifest not found"
+    };
+  }
+
+  return {
+    ok: true,
+    status: manifest.status,
+    readiness: manifest.status === "resolved" ? "ready" : "needs-discovery",
+    frontend: manifest.frontend,
+    backend: manifest.backend,
+    systemType: manifest.systemType,
+    architectureStyle: manifest.architectureStyle,
+    constraints: manifest.constraints,
+    workflowMode: manifest.workflowState.mode,
+    activeWorkItem: manifest.workflowState.activeWorkItem,
+    lastResolvedAt: manifest.lastResolvedAt
+  };
+}

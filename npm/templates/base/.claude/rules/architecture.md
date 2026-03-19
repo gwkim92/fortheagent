@@ -1,0 +1,1 @@
+claude architecture rule placeholder

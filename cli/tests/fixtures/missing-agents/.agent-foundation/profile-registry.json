@@ -1,0 +1,36 @@
+{
+  "frontend": [
+    "next",
+    "react-spa",
+    "none"
+  ],
+  "backend": [
+    "nest",
+    "fastify",
+    "serverless",
+    "none"
+  ],
+  "systemType": [
+    "internal-tool",
+    "b2b-saas",
+    "content-site",
+    "api-platform",
+    "realtime-app",
+    "data-platform"
+  ],
+  "architectureStyle": [
+    "monolith",
+    "modular-monolith",
+    "service-oriented",
+    "event-driven"
+  ],
+  "constraints": [
+    "seo",
+    "auth",
+    "payments",
+    "multi-tenant",
+    "pii",
+    "offline",
+    "realtime"
+  ]
+}
