@@ -233,4 +233,18 @@ describe("runSync", () => {
       )
     ).resolves.toContain("Initial Design Scope");
   });
+
+  it("repairs older repository skill files to include YAML frontmatter", async () => {
+    const cwd = await mkdtemp(path.join(tmpdir(), "agent-foundation-sync-"));
+
+    await runInit({ cwd, mode: "deferred" });
+    const skillPath = path.join(cwd, ".agents", "skills", "docs-writer", "SKILL.md");
+    await writeFile(skillPath, "# Docs Writer Skill\n", "utf8");
+
+    const summary = await runSync({ cwd });
+
+    expect(summary.updated).toContain(".agents/skills/docs-writer/SKILL.md");
+    await expect(readFile(skillPath, "utf8")).resolves.toContain('name: "docs-writer"');
+    await expect(readFile(skillPath, "utf8")).resolves.toContain("Docs Writer Skill");
+  });
 });

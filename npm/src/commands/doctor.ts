@@ -373,6 +373,60 @@ function validateFrontmatter(content: string, filePath: string): {
   };
 }
 
+function parseSkillFrontmatter(content: string): Record<string, string> | null {
+  const match = content.match(/^---\n([\s\S]*?)\n---\n/);
+
+  if (!match) {
+    return null;
+  }
+
+  const fields: Record<string, string> = {};
+
+  for (const rawLine of match[1].split("\n")) {
+    const line = rawLine.trim();
+
+    if (!line || line.startsWith("#")) {
+      continue;
+    }
+
+    const separatorIndex = line.indexOf(":");
+
+    if (separatorIndex <= 0) {
+      return null;
+    }
+
+    const key = line.slice(0, separatorIndex).trim();
+    const value = line
+      .slice(separatorIndex + 1)
+      .trim()
+      .replace(/^['"]|['"]$/g, "");
+
+    fields[key] = value;
+  }
+
+  return fields;
+}
+
+function validateSkillFrontmatter(content: string, filePath: string): string[] {
+  const frontmatter = parseSkillFrontmatter(content);
+
+  if (!frontmatter) {
+    return [`Missing or invalid skill frontmatter: ${filePath}`];
+  }
+
+  const errors: string[] = [];
+
+  if (!frontmatter.name) {
+    errors.push(`Skill frontmatter is missing name: ${filePath}`);
+  }
+
+  if (!frontmatter.description) {
+    errors.push(`Skill frontmatter is missing description: ${filePath}`);
+  }
+
+  return errors;
+}
+
 async function listActiveWorkFiles(cwd: string): Promise<string[]> {
   try {
     const entries = await readdir(path.join(cwd, "docs", "work", "active"), {
@@ -628,6 +682,13 @@ function validateConstraintCoverage(options: {
 
         for (const warning of frontmatterValidation.warnings) {
           warnings.push(warning);
+        }
+      }
+
+      if (requiredFile.startsWith(".agents/skills/") && requiredFile.endsWith("/SKILL.md")) {
+        for (const error of validateSkillFrontmatter(content, requiredFile)) {
+          errors.push(error);
+          repairCommands.add(`fortheagent sync --cwd ${cwd}`);
         }
       }
     } catch {
